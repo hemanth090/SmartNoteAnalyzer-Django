@@ -2,6 +2,30 @@
 
 Complete guide to deploy the Smart Note Analyzer on Render.com with both backend and frontend.
 
+## 🎯 One-Click Blueprint Deployment (Recommended)
+
+### **Method 1: Direct Blueprint Deployment**
+
+Click this button to deploy the entire stack instantly:
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/hemanth090/SmartNoteAnalyzer-Django)
+
+### **Method 2: Manual Blueprint Deployment**
+
+1. **Go to [Render Dashboard](https://dashboard.render.com)**
+2. **Click "New +" → "Blueprint"**
+3. **Connect Repository:** `https://github.com/hemanth090/SmartNoteAnalyzer-Django`
+4. **Branch:** `main`
+5. **Blueprint Name:** `smart-note-analyzer`
+6. **Click "Apply"**
+
+**⚡ Blueprint automatically creates:**
+- Backend Django API service
+- Frontend React static site
+- PostgreSQL database
+- All environment variables
+- Health checks and monitoring
+
 ## 📋 Prerequisites
 
 - ✅ GitHub repository with your code

@@ -49,12 +49,14 @@ lerna-debug.log*
 /frontend/build/
 /frontend/dist/
 
-# IDE
+# IDE and Editor files
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
+.sublime-project
+.sublime-workspace
 
 # OS
 .DS_Store
