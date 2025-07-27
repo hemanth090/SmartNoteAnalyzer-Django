@@ -1,14 +1,11 @@
 services:
-  # Backend Django API Service
   - type: web
     name: smart-note-analyzer-backend
     env: python
-    region: oregon
     plan: free
-    buildCommand: cd backend && chmod +x build.sh && ./build.sh
-    startCommand: cd backend && gunicorn smart_note_analyzer.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --timeout 120
+    buildCommand: cd backend && ./build.sh
+    startCommand: cd backend && gunicorn smart_note_analyzer.wsgi:application --bind 0.0.0.0:$PORT
     healthCheckPath: /api/health/
-    autoDeploy: true
     envVars:
       - key: PYTHON_VERSION
         value: 3.9.16
@@ -18,36 +15,9 @@ services:
         sync: false
       - key: SECRET_KEY
         generateValue: true
-      - key: WEB_CONCURRENCY
-        value: 2
-      - key: ALLOWED_HOSTS
-        value: .onrender.com,localhost,127.0.0.1
-      - key: CORS_ALLOWED_ORIGINS
-        value: https://smart-note-analyzer-frontend.onrender.com,http://localhost:3000
-    
-  # Frontend React Static Site
-  - type: static
-    name: smart-note-analyzer-frontend
-    buildCommand: cd frontend && npm ci --only=production && npm run build
-    staticPublishPath: frontend/build
-    pullRequestPreviewsEnabled: false
-    autoDeploy: true
-    headers:
-      - key: X-Frame-Options
-        value: DENY
-      - key: X-Content-Type-Options
-        value: nosniff
-    envVars:
-      - key: REACT_APP_API_URL
-        value: https://smart-note-analyzer-backend.onrender.com/api
-      - key: GENERATE_SOURCEMAP
-        value: false
-      - key: CI
-        value: false
 
 databases:
   - name: smart-note-analyzer-db
     databaseName: smart_note_analyzer
     user: postgres
-    region: oregon
     plan: free
