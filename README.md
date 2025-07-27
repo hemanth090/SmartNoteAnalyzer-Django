@@ -296,4 +296,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 [![Made with Python](https://img.shields.io/badge/Made%20with-Python-blue)](https://python.org)
 [![Made with React](https://img.shields.io/badge/Made%20with-React-61DAFB)](https://reactjs.org)
-[![Powered by AI](https://img.shields.io/badge/Powered%20by-AI-brightgreen)](https://groq.com)
