@@ -19,5 +19,4 @@ services:
 databases:
   - name: smart-note-analyzer-db
     databaseName: smart_note_analyzer
-    user: postgres
     plan: free
