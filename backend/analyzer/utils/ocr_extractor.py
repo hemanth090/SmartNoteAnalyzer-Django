@@ -1,7 +1,13 @@
-import pytesseract
-from PIL import Image
 import os
 from django.core.files.storage import default_storage
+
+try:
+    import pytesseract
+    from PIL import Image
+    TESSERACT_AVAILABLE = True
+except ImportError:
+    TESSERACT_AVAILABLE = False
+    print("Warning: Tesseract OCR not available. Image processing will be limited.")
 
 class OCRExtractor:
     """Extract text from images using Tesseract OCR"""
@@ -9,6 +15,9 @@ class OCRExtractor:
     @staticmethod
     def extract_text_from_image(image_file):
         """Extract text from image file using OCR"""
+        if not TESSERACT_AVAILABLE:
+            raise ValueError("OCR functionality is not available. Tesseract OCR is not installed or configured properly.")
+        
         # Save image temporarily
         file_path = default_storage.save(f'temp/{image_file.name}', image_file)
         full_path = default_storage.path(file_path)
