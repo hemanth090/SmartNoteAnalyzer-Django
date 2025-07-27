@@ -12,6 +12,14 @@ DEBUG = os.getenv('DEBUG', 'True').lower() == 'true'
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0']
 
+# Add Render.com to allowed hosts in production
+import os
+if not DEBUG:
+    ALLOWED_HOSTS.extend([
+        '.onrender.com',
+        os.environ.get('RENDER_EXTERNAL_HOSTNAME', '')
+    ])
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -27,6 +35,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # Add WhiteNoise for static files
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -62,6 +71,11 @@ DATABASES = {
     }
 }
 
+# Use PostgreSQL in production
+import dj_database_url
+if 'DATABASE_URL' in os.environ:
+    DATABASES['default'] = dj_database_url.parse(os.environ['DATABASE_URL'])
+
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -85,6 +99,9 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
+# WhiteNoise configuration for static files
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
@@ -95,6 +112,13 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
 ]
+
+# Add production CORS origins
+if not DEBUG:
+    CORS_ALLOWED_ORIGINS.extend([
+        "https://smart-note-analyzer.onrender.com",  # Update with your frontend URL
+        "https://your-frontend-name.onrender.com",   # Update with your actual frontend URL
+    ])
 
 CORS_ALLOW_CREDENTIALS = True
 
