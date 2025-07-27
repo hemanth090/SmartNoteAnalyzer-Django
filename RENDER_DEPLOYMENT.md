@@ -34,6 +34,19 @@ Click this button to deploy the entire stack instantly:
 
 ## 🐍 Step 1: Deploy Backend (Django API)
 
+**✅ Use the Blueprint for automatic backend deployment:**
+
+The `render.yaml` file in the repository will automatically deploy:
+- Django backend service
+- PostgreSQL database
+- All necessary environment variables
+
+## ⚛️ Step 2: Deploy Frontend (React App)
+
+**📖 Detailed Guide:** See [FRONTEND_DEPLOYMENT.md](FRONTEND_DEPLOYMENT.md) for complete instructions.
+
+**🚀 Quick Frontend Deployment:**
+
 ### 1.1 Create Web Service on Render
 
 1. **Go to Render Dashboard** → Click "New +" → Select "Web Service"
