@@ -215,8 +215,6 @@ cd frontend && npm run lint
    - Build command: `npm ci && npm run build`
    - Publish directory: `build`
 
-**📖 Complete Guide:** See [RENDER_DEPLOYMENT.md](RENDER_DEPLOYMENT.md) for detailed instructions.
-
 ### Alternative Deployment Options
 
 **Traditional Server:**
