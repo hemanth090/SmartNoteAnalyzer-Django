@@ -108,8 +108,15 @@ class AnalyzeFileView(APIView):
         uploaded_file = serializer.validated_data['file']
         
         try:
-            # Extract text from file (PDF or TXT only)
-            text = FileHandler.extract_text_from_file(uploaded_file)
+            # Extract text based on file type
+            from .utils.cloud_ocr import free_ocr
+            
+            if free_ocr.is_image_file(uploaded_file.name):
+                # Use FREE OCR for images - no cost!
+                text = free_ocr.extract_text_from_image(uploaded_file)
+            else:
+                # Use file handler for PDF/TXT
+                text = FileHandler.extract_text_from_file(uploaded_file)
             
             cleaned_text = FileHandler.clean_text(text)
             
@@ -172,10 +179,19 @@ class AnalyzeFileView(APIView):
                 return Response(
                     {
                         'error': 'Unsupported file format.',
-                        'message': 'Please upload PDF or TXT files only.',
-                        'supported_formats': ['PDF', 'TXT']
+                        'message': 'Please upload PDF, TXT, or image files.',
+                        'supported_formats': ['PDF', 'TXT', 'PNG', 'JPG', 'JPEG', 'GIF', 'BMP', 'TIFF', 'WEBP']
                     }, 
                     status=status.HTTP_400_BAD_REQUEST
+                )
+            elif 'OCR services are temporarily unavailable' in error_message:
+                return Response(
+                    {
+                        'error': 'OCR service temporarily unavailable.',
+                        'message': 'Please try again in a moment or upload PDF/TXT files instead.',
+                        'supported_formats': ['PDF', 'TXT', 'Images (when OCR is available)']
+                    }, 
+                    status=status.HTTP_503_SERVICE_UNAVAILABLE
                 )
             else:
                 return Response(
