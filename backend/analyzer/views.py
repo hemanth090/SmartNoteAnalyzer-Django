@@ -109,7 +109,17 @@ class AnalyzeFileView(APIView):
         try:
             # Extract text based on file type
             if OCRExtractor.is_image_file(uploaded_file.name):
-                text = OCRExtractor.extract_text_from_image(uploaded_file)
+                try:
+                    text = OCRExtractor.extract_text_from_image(uploaded_file)
+                except ValueError as ocr_error:
+                    return Response(
+                        {
+                            'error': 'OCR functionality is not available on this server. Please upload PDF or TXT files instead.',
+                            'supported_formats': ['PDF', 'TXT'],
+                            'uploaded_format': 'Image'
+                        }, 
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
             else:
                 text = FileHandler.extract_text_from_file(uploaded_file)
             
@@ -167,10 +177,32 @@ class AnalyzeFileView(APIView):
             return Response(response_data, status=status.HTTP_200_OK)
             
         except Exception as e:
-            return Response(
-                {'error': f'File processing failed: {str(e)}'}, 
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+            error_message = str(e)
+            
+            # Provide more specific error messages
+            if 'OCR functionality is not available' in error_message:
+                return Response(
+                    {
+                        'error': 'OCR functionality is not available on this server.',
+                        'message': 'Please upload PDF or TXT files instead of images.',
+                        'supported_formats': ['PDF', 'TXT']
+                    }, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            elif 'Unsupported file type' in error_message:
+                return Response(
+                    {
+                        'error': 'Unsupported file format.',
+                        'message': 'Please upload PDF or TXT files.',
+                        'supported_formats': ['PDF', 'TXT']
+                    }, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            else:
+                return Response(
+                    {'error': f'File processing failed: {error_message}'}, 
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
 
 class CompareNotesView(APIView):
     """Compare two notes semantically"""

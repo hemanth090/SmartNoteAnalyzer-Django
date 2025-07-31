@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Upload, Type, FileText, Image } from 'lucide-react';
+import { Upload, Type, FileText } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { analyzeText, analyzeFile } from '../services/api';
 
@@ -37,7 +37,14 @@ const NoteInput = ({ onAnalysisStart, onAnalysisComplete, loading }) => {
       onAnalysisComplete(result);
       toast.success('File analysis completed successfully!');
     } catch (error) {
-      toast.error('File analysis failed. Please try again.');
+      // Handle specific error messages from backend
+      if (error.response?.data?.error?.includes('OCR functionality is not available')) {
+        toast.error('Image files are not supported. Please upload PDF or TXT files only.');
+      } else if (error.response?.data?.error?.includes('Unsupported file type')) {
+        toast.error('Unsupported file format. Please upload PDF or TXT files only.');
+      } else {
+        toast.error('File analysis failed. Please try again.');
+      }
       onAnalysisComplete(null);
     }
   };
@@ -54,17 +61,11 @@ const NoteInput = ({ onAnalysisStart, onAnalysisComplete, loading }) => {
       // Check file type
       const allowedTypes = [
         'text/plain',
-        'application/pdf',
-        'image/png',
-        'image/jpeg',
-        'image/jpg',
-        'image/gif',
-        'image/bmp',
-        'image/webp'
+        'application/pdf'
       ];
       
       if (!allowedTypes.includes(file.type)) {
-        toast.error('Unsupported file type. Please use TXT, PDF, or image files.');
+        toast.error('Unsupported file type. Please upload PDF or TXT files only.');
         return;
       }
       
@@ -74,8 +75,7 @@ const NoteInput = ({ onAnalysisStart, onAnalysisComplete, loading }) => {
 
   const inputMethods = [
     { id: 'text', label: 'Text Input', icon: Type },
-    { id: 'file', label: 'File Upload', icon: FileText },
-    { id: 'image', label: 'Image OCR', icon: Image },
+    { id: 'file', label: 'File Upload (PDF, TXT)', icon: FileText },
   ];
 
   return (
@@ -132,23 +132,20 @@ const NoteInput = ({ onAnalysisStart, onAnalysisComplete, loading }) => {
       )}
 
       {/* File Upload */}
-      {(inputMethod === 'file' || inputMethod === 'image') && (
+      {inputMethod === 'file' && (
         <div className="space-y-4">
           <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center">
             <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
             <p className="text-gray-600 dark:text-gray-400 mb-4">
-              {inputMethod === 'image' 
-                ? 'Upload an image file for OCR text extraction'
-                : 'Upload a PDF or TXT file'
-              }
+              Upload a PDF or TXT file for analysis
+            </p>
+            <p className="text-sm text-gray-500 dark:text-gray-500 mb-4">
+              Supported formats: PDF, TXT (Max size: 10MB)
             </p>
             <input
               type="file"
               onChange={handleFileChange}
-              accept={inputMethod === 'image' 
-                ? 'image/*' 
-                : '.pdf,.txt,image/*'
-              }
+              accept=".pdf,.txt"
               className="hidden"
               id="file-upload"
             />

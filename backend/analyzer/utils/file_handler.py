@@ -21,7 +21,7 @@ class FileHandler:
             elif file_extension == '.pdf':
                 return FileHandler._extract_from_pdf(full_path)
             else:
-                raise ValueError(f"Unsupported file type: {file_extension}")
+                raise ValueError(f"Unsupported file type: {file_extension}. Supported formats: PDF, TXT")
         finally:
             # Clean up temporary file
             if default_storage.exists(file_path):
