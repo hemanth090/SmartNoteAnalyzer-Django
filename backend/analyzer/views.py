@@ -24,37 +24,7 @@ class HealthCheckView(APIView):
             'version': '1.0.0'
         }, status=status.HTTP_200_OK)
 
-class TestView(APIView):
-    """Test endpoint with more detailed info"""
-    
-    def get(self, request):
-        try:
-            # Test OCR availability safely
-            ocr_status = 'unknown'
-            try:
-                from .utils.ocr_extractor import OCRExtractor
-                ocr_status = 'available' if hasattr(OCRExtractor, 'TESSERACT_AVAILABLE') and OCRExtractor.TESSERACT_AVAILABLE else 'unavailable'
-            except Exception as ocr_error:
-                ocr_status = f'error: {str(ocr_error)}'
-            
-            return Response({
-                'status': 'healthy',
-                'message': 'Smart Note Analyzer API is running',
-                'groq_configured': bool(settings.GROQ_API_KEY),
-                'ocr_status': ocr_status,
-                'supported_formats': {
-                    'text': ['Direct text input'],
-                    'files': ['PDF', 'TXT'],
-                    'images': ['PNG', 'JPG', 'JPEG', 'GIF', 'BMP', 'TIFF', 'WEBP'] if ocr_status == 'available' else []
-                },
-                'version': '1.0.0'
-            }, status=status.HTTP_200_OK)
-        except Exception as e:
-            return Response({
-                'status': 'error',
-                'message': f'Test failed: {str(e)}',
-                'version': '1.0.0'
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 class AnalyzeTextView(APIView):
     """Analyze text input directly"""

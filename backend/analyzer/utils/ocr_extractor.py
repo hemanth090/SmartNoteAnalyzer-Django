@@ -4,40 +4,29 @@ from django.core.files.storage import default_storage
 try:
     import pytesseract
     from PIL import Image
-    TESSERACT_AVAILABLE = False  # Default to False
     
     # Test if tesseract is actually available
     try:
         pytesseract.get_tesseract_version()
         TESSERACT_AVAILABLE = True
-        print("✅ Tesseract OCR is available and working")
-    except Exception as e:
-        print(f"⚠️ Tesseract installed but not working: {e}")
-        # Try to set tesseract path for different systems
-        try:
-            import shutil
-            tesseract_path = shutil.which('tesseract')
-            if tesseract_path:
-                pytesseract.pytesseract.tesseract_cmd = tesseract_path
-                try:
-                    pytesseract.get_tesseract_version()
-                    TESSERACT_AVAILABLE = True
-                    print(f"✅ Tesseract OCR configured at: {tesseract_path}")
-                except Exception as path_error:
-                    TESSERACT_AVAILABLE = False
-                    print(f"❌ Tesseract found but not functional: {path_error}")
-            else:
+    except Exception:
+        # Try to find tesseract executable
+        import shutil
+        tesseract_path = shutil.which('tesseract')
+        if tesseract_path:
+            pytesseract.pytesseract.tesseract_cmd = tesseract_path
+            try:
+                pytesseract.get_tesseract_version()
+                TESSERACT_AVAILABLE = True
+            except Exception:
                 TESSERACT_AVAILABLE = False
-                print("❌ Tesseract executable not found in PATH")
-        except Exception as config_error:
+        else:
             TESSERACT_AVAILABLE = False
-            print(f"❌ Error configuring Tesseract: {config_error}")
             
-except ImportError as e:
+except ImportError:
     TESSERACT_AVAILABLE = False
     pytesseract = None
     Image = None
-    print(f"❌ Tesseract OCR dependencies not available: {e}")
 
 class OCRExtractor:
     """Extract text from images using Tesseract OCR"""
@@ -66,7 +55,6 @@ class OCRExtractor:
             return OCRExtractor._clean_ocr_text(text)
             
         except Exception as e:
-            print(f"OCR extraction error: {e}")
             raise ValueError(f"Unable to extract text from image: {str(e)}")
         finally:
             # Clean up temporary file

@@ -1,6 +1,5 @@
 import os
 import fitz  # PyMuPDF
-from pdfminer.high_level import extract_text
 from django.core.files.storage import default_storage
 
 class FileHandler:
@@ -40,29 +39,21 @@ class FileHandler:
     
     @staticmethod
     def _extract_from_pdf(file_path):
-        """Extract text from PDF using PyMuPDF (faster) with fallback to pdfminer"""
+        """Extract text from PDF using PyMuPDF"""
         try:
-            # Try PyMuPDF first (faster)
             doc = fitz.open(file_path)
             text = ""
             for page in doc:
                 text += page.get_text()
             doc.close()
             
-            if text.strip():
-                return text
-            else:
-                # Fallback to pdfminer for complex PDFs
-                return extract_text(file_path)
+            if not text.strip():
+                raise ValueError("No text could be extracted from PDF")
+                
+            return text
                 
         except Exception as e:
-            print(f"PDF extraction error: {e}")
-            # Fallback to pdfminer
-            try:
-                return extract_text(file_path)
-            except Exception as e2:
-                print(f"Fallback PDF extraction error: {e2}")
-                raise ValueError("Unable to extract text from PDF")
+            raise ValueError(f"Unable to extract text from PDF: {str(e)}")
     
     @staticmethod
     def clean_text(text):
