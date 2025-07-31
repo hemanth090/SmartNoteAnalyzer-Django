@@ -199,21 +199,18 @@ cd frontend && npm run lint
 
 ### Render Deployment (Recommended)
 
+**🎉 Live Demo:**
+- **Frontend:** https://smart-note-analyzer-frontend.onrender.com
+- **Backend API:** https://smart-note-analyzer-backend.onrender.com/api
+
 **One-Click Deploy:**
 [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/hemanth090/SmartNoteAnalyzer-Django)
 
 **Manual Deploy:**
 1. **Create Render account** at [render.com](https://render.com)
 2. **Connect GitHub repository**
-3. **Deploy backend:**
-   - Service type: Web Service
-   - Build command: `./build.sh`
-   - Start command: `gunicorn smart_note_analyzer.wsgi:application --bind 0.0.0.0:$PORT`
-   - Add environment variable: `GROQ_API_KEY=your_key`
-4. **Deploy frontend:**
-   - Service type: Static Site
-   - Build command: `npm ci && npm run build`
-   - Publish directory: `build`
+3. **Deploy using blueprint** (`render.yaml`)
+4. **Set environment variable:** `GROQ_API_KEY=your_key`
 
 ### Alternative Deployment Options
 

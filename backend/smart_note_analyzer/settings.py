@@ -12,20 +12,12 @@ DEBUG = os.getenv('DEBUG', 'True').lower() == 'true'
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0']
 
-# Add deployment platform hosts in production
-import os
+# Add Render hosts in production
 if not DEBUG:
-    # Render.com hosts
     ALLOWED_HOSTS.extend([
         '.onrender.com',
+        'smart-note-analyzer-backend.onrender.com',
         os.environ.get('RENDER_EXTERNAL_HOSTNAME', '')
-    ])
-    
-    # Vercel hosts
-    ALLOWED_HOSTS.extend([
-        '.vercel.app',
-        '.vercel.com',
-        os.environ.get('VERCEL_URL', '')
     ])
 
 INSTALLED_APPS = [
@@ -123,17 +115,19 @@ CORS_ALLOWED_ORIGINS = [
 
 # Add production CORS origins
 if not DEBUG:
-    # Render CORS origins
+    # Render CORS origins - automatically configured
     CORS_ALLOWED_ORIGINS.extend([
-        "https://smart-note-analyzer.onrender.com",  # Update with your frontend URL
-        "https://your-frontend-name.onrender.com",   # Update with your actual frontend URL
+        "https://smart-note-analyzer-frontend.onrender.com",
     ])
     
-    # Vercel CORS origins
-    if 'VERCEL_URL' in os.environ:
-        CORS_ALLOWED_ORIGINS.append(f"https://{os.environ['VERCEL_URL']}")
+    # Add custom frontend URL if provided
     if 'FRONTEND_URL' in os.environ:
         CORS_ALLOWED_ORIGINS.append(os.environ['FRONTEND_URL'])
+    
+    # Allow all Render subdomains for flexibility
+    CORS_ALLOWED_ORIGIN_REGEXES = [
+        r"^https://.*\.onrender\.com$",
+    ]
 
 CORS_ALLOW_CREDENTIALS = True
 

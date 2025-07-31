@@ -1,10 +1,12 @@
 services:
+  # Backend Django API Service
   - type: web
     name: smart-note-analyzer-backend
     env: python
     plan: free
-    buildCommand: cd backend && pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate
-    startCommand: cd backend && gunicorn smart_note_analyzer.wsgi:application --bind 0.0.0.0:$PORT
+    region: oregon
+    buildCommand: cd backend && pip install --upgrade pip && pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate
+    startCommand: cd backend && gunicorn smart_note_analyzer.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --timeout 120
     healthCheckPath: /api/health/
     envVars:
       - key: PYTHON_VERSION
@@ -17,8 +19,52 @@ services:
         generateValue: true
       - key: RENDER
         value: true
+      - key: WEB_CONCURRENCY
+        value: 2
+      - key: FRONTEND_URL
+        value: https://smart-note-analyzer-frontend.onrender.com
+    buildFilter:
+      paths:
+        - backend/**
+      ignoredPaths:
+        - frontend/**
+        - README.md
+        - LICENSE
 
+  # Frontend React Static Site
+  - type: static
+    name: smart-note-analyzer-frontend
+    buildCommand: cd frontend && npm ci && npm run build
+    staticPublishPath: frontend/build
+    pullRequestPreviewsEnabled: false
+    headers:
+      - key: X-Frame-Options
+        value: DENY
+      - key: X-Content-Type-Options
+        value: nosniff
+      - key: Referrer-Policy
+        value: strict-origin-when-cross-origin
+    envVars:
+      - key: REACT_APP_API_URL
+        value: https://smart-note-analyzer-backend.onrender.com/api
+      - key: GENERATE_SOURCEMAP
+        value: false
+      - key: CI
+        value: false
+      - key: NODE_VERSION
+        value: 18.17.0
+    buildFilter:
+      paths:
+        - frontend/**
+      ignoredPaths:
+        - backend/**
+        - README.md
+        - LICENSE
+
+# Database Configuration
 databases:
   - name: smart-note-analyzer-db
     databaseName: smart_note_analyzer
+    user: smart_note_analyzer_user
     plan: free
+    region: oregon
