@@ -17,6 +17,10 @@ services:
         generateValue: true
       - key: RENDER
         value: true
+    # System packages for OCR functionality
+    buildFilter:
+      paths:
+      - backend/**
 
 databases:
   - name: smart-note-analyzer-db
