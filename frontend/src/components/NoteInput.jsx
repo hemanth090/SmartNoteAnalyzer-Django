@@ -97,8 +97,8 @@ const NoteInput = ({ onAnalysisStart, onAnalysisComplete, loading }) => {
               key={method.id}
               onClick={() => setInputMethod(method.id)}
               className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${inputMethod === method.id
-                  ? 'bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300'
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'
+                ? 'bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300'
+                : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'
                 }`}
             >
               <Icon className="h-4 w-4" />
@@ -140,7 +140,7 @@ const NoteInput = ({ onAnalysisStart, onAnalysisComplete, loading }) => {
           <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center">
             <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
             <p className="text-gray-600 dark:text-gray-400 mb-4">
-              {inputMethod === 'image' 
+              {inputMethod === 'image'
                 ? 'Upload an image file for OCR text extraction'
                 : 'Upload a PDF or TXT file for analysis'
               }
@@ -154,8 +154,8 @@ const NoteInput = ({ onAnalysisStart, onAnalysisComplete, loading }) => {
             <input
               type="file"
               onChange={handleFileChange}
-              accept={inputMethod === 'image' 
-                ? 'image/*' 
+              accept={inputMethod === 'image'
+                ? 'image/*'
                 : '.pdf,.txt'
               }
               className="hidden"

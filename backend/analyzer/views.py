@@ -18,21 +18,37 @@ class HealthCheckView(APIView):
     """Health check endpoint"""
     
     def get(self, request):
-        # Check OCR availability
-        ocr_status = 'available' if OCRExtractor.TESSERACT_AVAILABLE else 'unavailable'
-        
-        return Response({
-            'status': 'healthy',
-            'message': 'Smart Note Analyzer API is running',
-            'groq_configured': bool(settings.GROQ_API_KEY),
-            'ocr_status': ocr_status,
-            'supported_formats': {
-                'text': ['Direct text input'],
-                'files': ['PDF', 'TXT'],
-                'images': ['PNG', 'JPG', 'JPEG', 'GIF', 'BMP', 'TIFF', 'WEBP'] if OCRExtractor.TESSERACT_AVAILABLE else []
-            },
-            'version': '1.0.0'
-        }, status=status.HTTP_200_OK)
+        try:
+            # Safely check OCR availability
+            ocr_status = 'available' if hasattr(OCRExtractor, 'TESSERACT_AVAILABLE') and OCRExtractor.TESSERACT_AVAILABLE else 'unavailable'
+            
+            return Response({
+                'status': 'healthy',
+                'message': 'Smart Note Analyzer API is running',
+                'groq_configured': bool(settings.GROQ_API_KEY),
+                'ocr_status': ocr_status,
+                'supported_formats': {
+                    'text': ['Direct text input'],
+                    'files': ['PDF', 'TXT'],
+                    'images': ['PNG', 'JPG', 'JPEG', 'GIF', 'BMP', 'TIFF', 'WEBP'] if ocr_status == 'available' else []
+                },
+                'version': '1.0.0'
+            }, status=status.HTTP_200_OK)
+        except Exception as e:
+            # Fallback response if there are any issues
+            return Response({
+                'status': 'healthy',
+                'message': 'Smart Note Analyzer API is running',
+                'groq_configured': bool(settings.GROQ_API_KEY),
+                'ocr_status': 'unavailable',
+                'ocr_error': str(e),
+                'supported_formats': {
+                    'text': ['Direct text input'],
+                    'files': ['PDF', 'TXT'],
+                    'images': []
+                },
+                'version': '1.0.0'
+            }, status=status.HTTP_200_OK)
 
 class AnalyzeTextView(APIView):
     """Analyze text input directly"""
