@@ -12,15 +12,30 @@ from .serializers import (
 )
 from .utils.groq_ai import GroqAIProcessor
 from .utils.file_handler import FileHandler
-from .utils.ocr_extractor import OCRExtractor
 
 class HealthCheckView(APIView):
-    """Health check endpoint"""
+    """Health check endpoint - minimal and bulletproof"""
+    
+    def get(self, request):
+        # Always return 200 OK - no exceptions allowed
+        return Response({
+            'status': 'healthy',
+            'message': 'Smart Note Analyzer API is running',
+            'version': '1.0.0'
+        }, status=status.HTTP_200_OK)
+
+class TestView(APIView):
+    """Test endpoint with more detailed info"""
     
     def get(self, request):
         try:
-            # Safely check OCR availability
-            ocr_status = 'available' if hasattr(OCRExtractor, 'TESSERACT_AVAILABLE') and OCRExtractor.TESSERACT_AVAILABLE else 'unavailable'
+            # Test OCR availability safely
+            ocr_status = 'unknown'
+            try:
+                from .utils.ocr_extractor import OCRExtractor
+                ocr_status = 'available' if hasattr(OCRExtractor, 'TESSERACT_AVAILABLE') and OCRExtractor.TESSERACT_AVAILABLE else 'unavailable'
+            except Exception as ocr_error:
+                ocr_status = f'error: {str(ocr_error)}'
             
             return Response({
                 'status': 'healthy',
@@ -35,20 +50,11 @@ class HealthCheckView(APIView):
                 'version': '1.0.0'
             }, status=status.HTTP_200_OK)
         except Exception as e:
-            # Fallback response if there are any issues
             return Response({
-                'status': 'healthy',
-                'message': 'Smart Note Analyzer API is running',
-                'groq_configured': bool(settings.GROQ_API_KEY),
-                'ocr_status': 'unavailable',
-                'ocr_error': str(e),
-                'supported_formats': {
-                    'text': ['Direct text input'],
-                    'files': ['PDF', 'TXT'],
-                    'images': []
-                },
+                'status': 'error',
+                'message': f'Test failed: {str(e)}',
                 'version': '1.0.0'
-            }, status=status.HTTP_200_OK)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class AnalyzeTextView(APIView):
     """Analyze text input directly"""
@@ -133,6 +139,9 @@ class AnalyzeFileView(APIView):
         
         try:
             # Extract text based on file type
+            # Import OCR only when needed to avoid import errors
+            from .utils.ocr_extractor import OCRExtractor
+            
             if OCRExtractor.is_image_file(uploaded_file.name):
                 text = OCRExtractor.extract_text_from_image(uploaded_file)
             else:
