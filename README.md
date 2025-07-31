@@ -200,7 +200,7 @@ cd frontend && npm run lint
 ### Render Deployment (Recommended)
 
 **One-Click Deploy:**
-[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/yourusername/SmartNoteAnalyzer-Django)
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/hemanth090/SmartNoteAnalyzer-Django)
 
 **Manual Deploy:**
 1. **Create Render account** at [render.com](https://render.com)
