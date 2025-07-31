@@ -18,10 +18,19 @@ class HealthCheckView(APIView):
     """Health check endpoint"""
     
     def get(self, request):
+        # Check OCR availability
+        ocr_status = 'available' if OCRExtractor.TESSERACT_AVAILABLE else 'unavailable'
+        
         return Response({
             'status': 'healthy',
             'message': 'Smart Note Analyzer API is running',
             'groq_configured': bool(settings.GROQ_API_KEY),
+            'ocr_status': ocr_status,
+            'supported_formats': {
+                'text': ['Direct text input'],
+                'files': ['PDF', 'TXT'],
+                'images': ['PNG', 'JPG', 'JPEG', 'GIF', 'BMP', 'TIFF', 'WEBP'] if OCRExtractor.TESSERACT_AVAILABLE else []
+            },
             'version': '1.0.0'
         }, status=status.HTTP_200_OK)
 
@@ -109,17 +118,7 @@ class AnalyzeFileView(APIView):
         try:
             # Extract text based on file type
             if OCRExtractor.is_image_file(uploaded_file.name):
-                try:
-                    text = OCRExtractor.extract_text_from_image(uploaded_file)
-                except ValueError as ocr_error:
-                    return Response(
-                        {
-                            'error': 'OCR functionality is not available on this server. Please upload PDF or TXT files instead.',
-                            'supported_formats': ['PDF', 'TXT'],
-                            'uploaded_format': 'Image'
-                        }, 
-                        status=status.HTTP_400_BAD_REQUEST
-                    )
+                text = OCRExtractor.extract_text_from_image(uploaded_file)
             else:
                 text = FileHandler.extract_text_from_file(uploaded_file)
             
@@ -184,17 +183,17 @@ class AnalyzeFileView(APIView):
                 return Response(
                     {
                         'error': 'OCR functionality is not available on this server.',
-                        'message': 'Please upload PDF or TXT files instead of images.',
-                        'supported_formats': ['PDF', 'TXT']
+                        'message': 'Tesseract OCR is not properly installed. Please try again later or upload PDF/TXT files.',
+                        'supported_formats': ['PDF', 'TXT', 'Images (when OCR is available)']
                     }, 
-                    status=status.HTTP_400_BAD_REQUEST
+                    status=status.HTTP_503_SERVICE_UNAVAILABLE
                 )
             elif 'Unsupported file type' in error_message:
                 return Response(
                     {
                         'error': 'Unsupported file format.',
-                        'message': 'Please upload PDF or TXT files.',
-                        'supported_formats': ['PDF', 'TXT']
+                        'message': 'Please upload PDF, TXT, or image files.',
+                        'supported_formats': ['PDF', 'TXT', 'PNG', 'JPG', 'JPEG', 'GIF', 'BMP', 'TIFF']
                     }, 
                     status=status.HTTP_400_BAD_REQUEST
                 )

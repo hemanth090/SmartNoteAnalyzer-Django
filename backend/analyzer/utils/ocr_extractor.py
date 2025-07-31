@@ -4,10 +4,33 @@ from django.core.files.storage import default_storage
 try:
     import pytesseract
     from PIL import Image
-    TESSERACT_AVAILABLE = True
-except ImportError:
+    
+    # Test if tesseract is actually available
+    try:
+        pytesseract.get_tesseract_version()
+        TESSERACT_AVAILABLE = True
+        print("✅ Tesseract OCR is available and working")
+    except Exception as e:
+        print(f"⚠️ Tesseract installed but not working: {e}")
+        # Try to set tesseract path for different systems
+        import shutil
+        tesseract_path = shutil.which('tesseract')
+        if tesseract_path:
+            pytesseract.pytesseract.tesseract_cmd = tesseract_path
+            try:
+                pytesseract.get_tesseract_version()
+                TESSERACT_AVAILABLE = True
+                print(f"✅ Tesseract OCR configured at: {tesseract_path}")
+            except:
+                TESSERACT_AVAILABLE = False
+                print("❌ Tesseract found but not functional")
+        else:
+            TESSERACT_AVAILABLE = False
+            print("❌ Tesseract executable not found in PATH")
+            
+except ImportError as e:
     TESSERACT_AVAILABLE = False
-    print("Warning: Tesseract OCR not available. Image processing will be limited.")
+    print(f"❌ Tesseract OCR not available: {e}")
 
 class OCRExtractor:
     """Extract text from images using Tesseract OCR"""

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Upload, Type, FileText } from 'lucide-react';
+import { Upload, Type, FileText, Image } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { analyzeText, analyzeFile } from '../services/api';
 
@@ -39,9 +39,9 @@ const NoteInput = ({ onAnalysisStart, onAnalysisComplete, loading }) => {
     } catch (error) {
       // Handle specific error messages from backend
       if (error.response?.data?.error?.includes('OCR functionality is not available')) {
-        toast.error('Image files are not supported. Please upload PDF or TXT files only.');
+        toast.error('OCR service is temporarily unavailable. Please try again later or upload PDF/TXT files.');
       } else if (error.response?.data?.error?.includes('Unsupported file type')) {
-        toast.error('Unsupported file format. Please upload PDF or TXT files only.');
+        toast.error('Unsupported file format. Please upload PDF, TXT, or image files.');
       } else {
         toast.error('File analysis failed. Please try again.');
       }
@@ -57,18 +57,21 @@ const NoteInput = ({ onAnalysisStart, onAnalysisComplete, loading }) => {
         toast.error('File size must be less than 10MB');
         return;
       }
-      
-      // Check file type
-      const allowedTypes = [
-        'text/plain',
-        'application/pdf'
-      ];
-      
+
+      // Check file type based on input method
+      let allowedTypes = [];
+      if (inputMethod === 'file') {
+        allowedTypes = ['text/plain', 'application/pdf'];
+      } else if (inputMethod === 'image') {
+        allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/bmp', 'image/webp', 'image/tiff'];
+      }
+
       if (!allowedTypes.includes(file.type)) {
-        toast.error('Unsupported file type. Please upload PDF or TXT files only.');
+        const expectedFormats = inputMethod === 'file' ? 'PDF or TXT' : 'image';
+        toast.error(`Unsupported file type. Please upload ${expectedFormats} files only.`);
         return;
       }
-      
+
       setSelectedFile(file);
     }
   };
@@ -76,6 +79,7 @@ const NoteInput = ({ onAnalysisStart, onAnalysisComplete, loading }) => {
   const inputMethods = [
     { id: 'text', label: 'Text Input', icon: Type },
     { id: 'file', label: 'File Upload (PDF, TXT)', icon: FileText },
+    { id: 'image', label: 'Image OCR', icon: Image },
   ];
 
   return (
@@ -92,11 +96,10 @@ const NoteInput = ({ onAnalysisStart, onAnalysisComplete, loading }) => {
             <button
               key={method.id}
               onClick={() => setInputMethod(method.id)}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
-                inputMethod === method.id
+              className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${inputMethod === method.id
                   ? 'bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300'
                   : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'
-              }`}
+                }`}
             >
               <Icon className="h-4 w-4" />
               <span className="text-sm font-medium">{method.label}</span>
@@ -132,20 +135,29 @@ const NoteInput = ({ onAnalysisStart, onAnalysisComplete, loading }) => {
       )}
 
       {/* File Upload */}
-      {inputMethod === 'file' && (
+      {(inputMethod === 'file' || inputMethod === 'image') && (
         <div className="space-y-4">
           <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center">
             <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
             <p className="text-gray-600 dark:text-gray-400 mb-4">
-              Upload a PDF or TXT file for analysis
+              {inputMethod === 'image' 
+                ? 'Upload an image file for OCR text extraction'
+                : 'Upload a PDF or TXT file for analysis'
+              }
             </p>
             <p className="text-sm text-gray-500 dark:text-gray-500 mb-4">
-              Supported formats: PDF, TXT (Max size: 10MB)
+              {inputMethod === 'image'
+                ? 'Supported formats: PNG, JPG, JPEG, GIF, BMP, WEBP, TIFF (Max size: 10MB)'
+                : 'Supported formats: PDF, TXT (Max size: 10MB)'
+              }
             </p>
             <input
               type="file"
               onChange={handleFileChange}
-              accept=".pdf,.txt"
+              accept={inputMethod === 'image' 
+                ? 'image/*' 
+                : '.pdf,.txt'
+              }
               className="hidden"
               id="file-upload"
             />
