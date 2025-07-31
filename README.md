@@ -12,8 +12,7 @@ A comprehensive AI-powered web application that transforms your notes into actio
 
 ### 🔍 **Multi-Input Analysis**
 - **📝 Text Input**: Direct typing or pasting
-- **📄 File Upload**: PDF and TXT file support  
-- **🖼️ Image OCR**: Extract text from images using Tesseract
+- **📄 File Upload**: PDF and TXT file support
 
 ### 🤖 **Advanced AI Analysis**
 - **� Compraehensive Summaries**: 15-25 sentence detailed analysis

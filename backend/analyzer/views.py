@@ -108,14 +108,8 @@ class AnalyzeFileView(APIView):
         uploaded_file = serializer.validated_data['file']
         
         try:
-            # Extract text based on file type
-            # Import OCR only when needed to avoid import errors
-            from .utils.ocr_extractor import OCRExtractor
-            
-            if OCRExtractor.is_image_file(uploaded_file.name):
-                text = OCRExtractor.extract_text_from_image(uploaded_file)
-            else:
-                text = FileHandler.extract_text_from_file(uploaded_file)
+            # Extract text from file (PDF or TXT only)
+            text = FileHandler.extract_text_from_file(uploaded_file)
             
             cleaned_text = FileHandler.clean_text(text)
             
@@ -173,22 +167,13 @@ class AnalyzeFileView(APIView):
         except Exception as e:
             error_message = str(e)
             
-            # Provide more specific error messages
-            if 'OCR functionality is not available' in error_message:
-                return Response(
-                    {
-                        'error': 'OCR functionality is not available on this server.',
-                        'message': 'Tesseract OCR is not properly installed. Please try again later or upload PDF/TXT files.',
-                        'supported_formats': ['PDF', 'TXT', 'Images (when OCR is available)']
-                    }, 
-                    status=status.HTTP_503_SERVICE_UNAVAILABLE
-                )
-            elif 'Unsupported file type' in error_message:
+            # Provide specific error messages
+            if 'Unsupported file type' in error_message:
                 return Response(
                     {
                         'error': 'Unsupported file format.',
-                        'message': 'Please upload PDF, TXT, or image files.',
-                        'supported_formats': ['PDF', 'TXT', 'PNG', 'JPG', 'JPEG', 'GIF', 'BMP', 'TIFF']
+                        'message': 'Please upload PDF or TXT files only.',
+                        'supported_formats': ['PDF', 'TXT']
                     }, 
                     status=status.HTTP_400_BAD_REQUEST
                 )
